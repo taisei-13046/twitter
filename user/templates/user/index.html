@@ -1,0 +1,9 @@
+{% extends "user/base.html" %}
+{% block title %}トップページ{% endblock %}
+
+{% block content %}
+<h1>Twitter</h1>
+<p><form action="{% url 'user:signup' %}">
+	<input type="submit" value="ユーザ登録"/>
+</form></p>
+{% endblock %}
