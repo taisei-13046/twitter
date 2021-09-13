@@ -1,9 +1,12 @@
 {% extends "user/base.html" %}
+{% load static %}
+{% load widget_tweaks %}
 {% block title %}ユーザ登録{% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-light bg-light text-center">
-  <div class="container-fluid">
+<img src="{% static "img/twitter_background.jpg" %}" id="background" >
+<nav class="navbar navbar-expand-md navbar-light bg-light">
+  <div class="container-fluid ">
     <a class="navbar-brand" href="">Twitter</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -21,7 +24,7 @@
   </div>
 </nav>
 <div class="row">
-    <div class="col-sm-6 center-block">
+    <div class="col">
         <br>
         <h1>新規登録</h1>
         <form method="POST">
@@ -29,7 +32,7 @@
             {{ form.non_field_errors }}
             {% for field in form %}
                 {{ field.label }}
-            <div>{{ field }}</div>
+            <div>{{ field|add_class:"form-control user_form" }}</div>
                 {{ field.errors }}
                 <br>
             {% endfor %}
