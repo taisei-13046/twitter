@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.views.generic import TemplateView, CreateView
 from django.http.response import HttpResponseRedirect
 from django.contrib.auth import login

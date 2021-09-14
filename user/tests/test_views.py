@@ -73,3 +73,29 @@ class InvalidSignUpTests(TestCase):
     def test_not_create_user(self):
         """ユーザが存在しないことを確認"""
         self.assertFalse(User.objects.exists())
+
+
+class LessPasswordSignUpTests(TestCase):
+    def setUp(self):
+        """短いパスワードのユーザを作成"""
+        url = reverse('user:signup')
+        data = {
+            'username': 'example',
+            'email': 'sample@example.com',
+            'password1': '123',
+            'password2': '123'
+        }
+        self.response = self.client.post(url, data)
+
+    def test_signup_status_code(self):
+        """ステータスコード200を返されることを確認"""
+        self.assertEquals(self.response.status_code, 200)
+
+    def test_form_errors(self):
+        """formエラーの検証"""
+        form = self.response.context.get('form')
+        self.assertTrue(form.errors)
+
+    def test_not_create_user(self):
+        """ユーザが存在しないことを確認"""
+        self.assertFalse(User.objects.exists())
