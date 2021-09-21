@@ -10,10 +10,6 @@ class HomeView(TemplateView):
 	template_name = "user/home.html"
 
 
-class LoginView(TemplateView):
-	template_name = "user/login.html"
-
-
 class LogoutView(TemplateView):
 	template_name = "user/logout.html"
 
