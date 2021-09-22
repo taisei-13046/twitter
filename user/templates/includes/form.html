@@ -1,4 +1,5 @@
 {% load widget_tweaks %}
+{% load static %}
 
 {% if form.non_field_errors %}
   <div class="alert alert-danger" role="alert">
@@ -19,7 +20,7 @@
     {% endfor %}
     {% if field.help_text %}
       <small class="form-text text-muted">
-        {{ field.help_text|safe }}
+        {{ field|add_class:"form-control user_form" }}
       </small>
     {% endif %}
   </div>
