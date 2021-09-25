@@ -64,7 +64,7 @@ class InvalidSignUpTests(TestCase):
         res = self.client.post(self.url, {})
         self.assertEquals(res.status_code, 200)
         self.assertTrue(res.context.get('form').errors)
-        self.assertFalse(User.objects.filter(username='example').exists())
+        self.assertFalse(User.objects.exists())
 
     def test_post_failed_short_password(self):
         """短いパスワード"""
