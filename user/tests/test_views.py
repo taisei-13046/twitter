@@ -59,7 +59,7 @@ class InvalidSignUpTests(TestCase):
     def setUp(self):
         self.url = reverse('user:signup')
 
-    def test_post_empty_signUp(self):
+    def test_post_empty_signup(self):
         """空のユーザを作成"""
         res = self.client.post(self.url, {})
         self.assertEquals(res.status_code, 200)
