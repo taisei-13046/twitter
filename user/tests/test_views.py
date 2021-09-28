@@ -51,21 +51,13 @@ class SuccessfulSignUpTests(TestCase):
 class InvalidSignUpTests(TestCase):
 
     def setUp(self):
-        """不適切なユーザを作成"""
-        url = reverse('user:signup')
-        self.response = self.client.post(url, {})
+        self.url = reverse('user:signup')
 
-    def test_signup_status_code(self):
-        """ステータスコード200を返されることを確認"""
-        self.assertEquals(self.response.status_code, 200)
-
-    def test_form_errors(self):
-        """formエラーの検証"""
-        form = self.response.context.get('form')
-        self.assertTrue(form.errors)
-
-    def test_not_create_user(self):
-        """ユーザが存在しないことを確認"""
+    def test_post_empty_user(self):
+        """空のユーザを作成"""
+        res = self.client.post(self.url, {})
+        self.assertEquals(res.status_code, 200)
+        self.assertTrue(res.context.get('form').errors)
         self.assertFalse(User.objects.exists())
 
 
@@ -73,23 +65,95 @@ class LessPasswordSignUpTests(TestCase):
 
     def setUp(self):
         """短いパスワードのユーザを作成"""
-        url = reverse('user:signup')
-        data = {
+        self.url = reverse('user:signup')
+
+    def test_post_failed_short_password(self):
+        """短いパスワード"""
+        less_password_data = {
             'username': 'example',
             'email': 'sample@example.com',
             'password1': '123',
             'password2': '123'
         }
-        self.response = self.client.post(url, data)
+        res = self.client.post(self.url, less_password_data)
+        self.assertEquals(res.status_code, 200)
+        self.assertTrue(res.context.get('form').errors)
+        self.assertFalse(User.objects.filter(username='example').exists())
 
-    def test_signup_status_code(self):
-        """ステータスコード200を返されることを確認"""
-        self.assertEquals(self.response.status_code, 200)
+    def test_post_failed_invalid_email(self):
+        """"@のないemail"""
+        invalid_email_data = {
+            'username': 'example',
+            'email': 'sample',
+            'password1': '12345678',
+            'password2': '12345678'
+        }
+        res = self.client.post(self.url, invalid_email_data )
+        self.assertEquals(res.status_code, 200)
+        self.assertTrue(res.context.get('form').errors)
+        self.assertFalse(User.objects.filter(username='example').exists())
 
-    def test_form_errors(self):
-        """formエラーの検証"""
-        form = self.response.context.get('form')
-        self.assertTrue(form.errors)
+    def test_post_failed_different_password(self):
+        """パスワードが一致していない"""
+        different_password_data = {
+            'username': 'example',
+            'email': 'sample@example.com',
+            'password1': '1234',
+            'password2': '12345678'
+        }
+        res = self.client.post(self.url, different_password_data)
+        self.assertEquals(res.status_code, 200)
+        self.assertTrue(res.context.get('form').errors)
+        self.assertFalse(User.objects.filter(username='example').exists())
+
+    def test_post_failed_only_number_password(self):
+        """数字のみのパスワード"""
+        only_number_password_data = {
+            'username': 'example',
+            'email': 'sample@example.com',
+            'password1': '12345678',
+            'password2': '12345678'
+        }
+        res = self.client.post(self.url, only_number_password_data)
+        self.assertEquals(res.status_code, 200)
+        self.assertTrue(res.context.get('form').errors)
+        self.assertFalse(User.objects.filter(username='example').exists())
+
+    def test_post_failed_like_username_and_password(self):
+        """ユーザ名に似たパスワード"""
+        like_username_and_password_data = {
+            'username': 'example',
+            'email': 'sample@example.com',
+            'password1': 'example13046',
+            'password2': 'example13046'
+        }
+        res = self.client.post(self.url, like_username_and_password_data)
+        self.assertEquals(res.status_code, 200)
+        self.assertTrue(res.context.get('form').errors)
+        self.assertFalse(User.objects.filter(username='example').exists())
+
+    def test_post_failed_easy_password(self):
+        """一般的すぎるパスワード"""
+        easy_password_data = {
+            'username': 'example',
+            'email': 'sample@example.com',
+            'password1': 'abcdefghi',
+            'password2': 'abcdefghi'
+        }
+        res = self.client.post(self.url, easy_password_data)
+        self.assertEquals(res.status_code, 200)
+        self.assertTrue(res.context.get('form').errors)
+        self.assertFalse(User.objects.filter(username='example').exists())
+
+    def test_post_duplicate_username(self):
+        """重複したユーザ"""
+        first_username_data = {
+            'username': 'example',
+            'email': 'sample@example.com',
+            'password1': 'success13046',
+            'password2': 'success13046'
+        }
+        self.client.post(self.url, first_username_data)
 
     def test_not_create_user(self):
         """ユーザが存在しないことを確認"""
