@@ -1,4 +1,5 @@
 {% extends "user/base.html" %}
+{% load static %}
 {% block title %}ホーム{% endblock %}
 
 {% block content %}
@@ -24,6 +25,34 @@
     </div>
   </div>
 </nav>
-<h1>ホーム</h1>
-<p>{{ user.username }}さんようこそ。</p>
+<div class="wrapper">
+  <div>
+    <div>Ready Tweet</div>
+    <div class="profile-box">
+      <div>{{ user.username }}</div>
+        <div style="display: flex;">
+          <div>
+            <div>Follower</div>
+            <div>2</div>
+          </div>
+          <div>
+            <div>Follower</div>
+            <div>2</div>
+          </div>
+        </div>
+      <button type="submit" class="btn btn-primary">Tweet</button>
+    </div>
+  </div>
+  <div>
+    <h4>Tweet</h4>
+    <div>
+      <div class="container bg-light">
+        <textarea type="text" name="tweet" placeholder="Tweet" class="form-control tweet-textarea"></textarea>
+        <div class="text-right">
+          <button type="submit" class="btn btn-primary">Tweet</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

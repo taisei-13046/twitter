@@ -12,6 +12,10 @@
     -ms-transform: translate(-50%, -50%);
 }
 
-.user_form {
+.user-form {
     width: 300px;
+}
+
+.home-title{
+    text-align: center;
 }
