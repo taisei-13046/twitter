@@ -166,6 +166,7 @@ class LoginTest(TestCase):
         User.objects.create_user('ytaisei', 'example@gmail.com', 'example13046')
         self.url = reverse("user:login")
         self.home_url = reverse("user:home")
+        self.client = Client()
 
     def test_correct_login(self):
         """正しいログイン"""
@@ -173,11 +174,12 @@ class LoginTest(TestCase):
             'username': 'ytaisei',
             'password': 'example13046'
         }
-        response = self.client.post(self.url, data)
+        post_response = self.client.post(self.url, data)
+        get_response = self.client.get(self.home_url)
 
         # 302: リクエストされたリソースが一時的にLocationで示されたURLへ移動したことを示す
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, self.home_url)
+        self.assertEqual(post_response .status_code, 302)
+        self.assertRedirects(post_response, self.home_url)
 
     def test_incorrect_username_login(self):
         """異なる,存在しないユーザ名でのログイン"""
@@ -185,10 +187,10 @@ class LoginTest(TestCase):
             'username': 'yasui',
             'password': 'example13046'
         }
-        response = self.client.post(self.url, data)
+        post_response = self.client.post(self.url, data)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertFormError(response, 'form', '', '正しいユーザー名とパスワードを入力してください。どちらのフィールドも大文字と小文字は区別されます。')
+        self.assertEqual(post_response .status_code, 200)
+        self.assertFormError(post_response, 'form', '', '正しいユーザー名とパスワードを入力してください。どちらのフィールドも大文字と小文字は区別されます。')
 
     def test_incorrect_password_login(self):
         """間違ったパスワードでのログイン"""
@@ -196,10 +198,10 @@ class LoginTest(TestCase):
             'username': 'ytaisei',
             'password': 'example'
         }
-        response = self.client.post(self.url, data)
+        post_response = self.client.post(self.url, data)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertFormError(response, 'form', '', '正しいユーザー名とパスワードを入力してください。どちらのフィールドも大文字と小文字は区別されます。')
+        self.assertEqual(post_response .status_code, 200)
+        self.assertFormError(post_response, 'form', '', '正しいユーザー名とパスワードを入力してください。どちらのフィールドも大文字と小文字は区別されます。')
 
 
 class LogoutTest(TestCase):
