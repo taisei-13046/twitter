@@ -1,6 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth.models import User
+from django.contrib.auth import SESSION_KEY
 
 
 class HomeViewTests(TestCase):
@@ -174,12 +175,13 @@ class LoginTest(TestCase):
             'username': 'ytaisei',
             'password': 'example13046'
         }
-        post_response = self.client.post(self.url, data)
-        get_response = self.client.get(self.home_url)
+        self.assertNotIn(SESSION_KEY, self.client.session)
+        response = self.client.post(self.url, data)
 
         # 302: リクエストされたリソースが一時的にLocationで示されたURLへ移動したことを示す
-        self.assertEqual(post_response .status_code, 302)
-        self.assertRedirects(post_response, self.home_url)
+        self.assertEqual(response .status_code, 302)
+        self.assertRedirects(response, self.home_url)
+        self.assertIn(SESSION_KEY, self.client.session)
 
     def test_incorrect_username_login(self):
         """異なる,存在しないユーザ名でのログイン"""
@@ -187,10 +189,12 @@ class LoginTest(TestCase):
             'username': 'yasui',
             'password': 'example13046'
         }
-        post_response = self.client.post(self.url, data)
+        response = self.client.post(self.url, data)
+        self.assertNotIn(SESSION_KEY, self.client.session)
 
-        self.assertEqual(post_response .status_code, 200)
-        self.assertFormError(post_response, 'form', '', '正しいユーザー名とパスワードを入力してください。どちらのフィールドも大文字と小文字は区別されます。')
+        self.assertEqual(response .status_code, 200)
+        self.assertFormError(response, 'form', '', '正しいユーザー名とパスワードを入力してください。どちらのフィールドも大文字と小文字は区別されます。')
+        self.assertNotIn(SESSION_KEY, self.client.session)
 
     def test_incorrect_password_login(self):
         """間違ったパスワードでのログイン"""
@@ -198,10 +202,12 @@ class LoginTest(TestCase):
             'username': 'ytaisei',
             'password': 'example'
         }
-        post_response = self.client.post(self.url, data)
+        response = self.client.post(self.url, data)
+        self.assertNotIn(SESSION_KEY, self.client.session)
 
-        self.assertEqual(post_response .status_code, 200)
-        self.assertFormError(post_response, 'form', '', '正しいユーザー名とパスワードを入力してください。どちらのフィールドも大文字と小文字は区別されます。')
+        self.assertEqual(response .status_code, 200)
+        self.assertFormError(response, 'form', '', '正しいユーザー名とパスワードを入力してください。どちらのフィールドも大文字と小文字は区別されます。')
+        self.assertNotIn(SESSION_KEY, self.client.session)
 
 
 class LogoutTest(TestCase):
@@ -209,8 +215,10 @@ class LogoutTest(TestCase):
     def setUp(self):
         User.objects.create_user('ytaisei', 'example@gmail.com', 'example13046')
         self.client.login(username='ytaisei', password='example13046')
+        self.assertIn(SESSION_KEY, self.client.session)
         self.url = reverse('user:logout')
 
     def test_success_logout(self):
         response = self.client.get(self.url)
         self.assertRedirects(response, reverse('user:signup'))
+        self.assertNotIn(SESSION_KEY, self.client.session)
