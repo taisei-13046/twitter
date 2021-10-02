@@ -6,6 +6,16 @@ from django.contrib.auth import SESSION_KEY
 
 class HomeViewTests(TestCase):
     """HomeViewのテストクラス"""
+    def setUp(self):
+        url = reverse('user:signup')
+        data = {
+            'username': 'example',
+            'email': 'sample@example.com',
+            'password1': 'abcdef123456',
+            'password2': 'abcdef123456'
+        }
+        self.response = self.client.post(url, data)
+
     def test_get(self):
         """GET メソッドでアクセスしてステータスコード200を返されることを確認"""
         response = self.client.get(reverse('user:home'))
@@ -222,3 +232,13 @@ class LogoutTest(TestCase):
         response = self.client.get(self.url)
         self.assertRedirects(response, reverse('user:signup'))
         self.assertNotIn(SESSION_KEY, self.client.session)
+
+
+class RedirectNotLoginUser(TestCase):
+    """ログインしていない状態で/homeに遷移する"""
+    def setUp(self):
+        self.home_url = reverse('user:home')
+
+    def test_redirect_not_login_user(self):
+        response = self.client.get(self.home_url)
+        self.assertRedirects(response, '/login/?next=%2Fhome%2F')
