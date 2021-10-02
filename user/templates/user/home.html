@@ -2,7 +2,6 @@
 {% block title %}ホーム{% endblock %}
 
 {% block content %}
-{% if user.is_authenticated %}
 <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
   <div class="container">
     <a class="navbar-brand" href="{% url 'user:home' %}">Twitter</a>
@@ -27,8 +26,4 @@
 </nav>
 <h1>ホーム</h1>
 <p>{{ user.username }}さんようこそ。</p>
-{% else %}
-  <h3>You are not logged in</h3>
-  <a href="{% url 'user:login' %}">login</a>
-{% endif %}
 {% endblock %}
