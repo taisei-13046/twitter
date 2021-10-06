@@ -1,10 +1,18 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth.models import User
+from django.contrib.auth import SESSION_KEY
 
 
 class HomeViewTests(TestCase):
     """HomeViewのテストクラス"""
+    @classmethod
+    def setUpTestData(cls):
+        User.objects.create_user('ytaisei', 'example@gmail.com', 'example13046')
+
+    def setUp(self):
+        self.client.login(username='ytaisei', password='example13046')
+
     def test_get(self):
         """GET メソッドでアクセスしてステータスコード200を返されることを確認"""
         response = self.client.get(reverse('user:home'))
@@ -19,15 +27,8 @@ class LoginViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class LogoutViewTests(TestCase):
-    """LogoutViewのテストクラス"""
-    def test_get(self):
-        """GET メソッドでアクセスしてステータスコード200を返されることを確認"""
-        response = self.client.get(reverse('user:logout'))
-        self.assertEqual(response.status_code, 200)
-
-
 class SuccessfulSignUpTests(TestCase):
+
     def setUp(self):
         """sampleでユーザを作成"""
         url = reverse('user:signup')
@@ -56,6 +57,7 @@ class SuccessfulSignUpTests(TestCase):
 
 
 class InvalidSignUpTests(TestCase):
+
     def setUp(self):
         self.url = reverse('user:signup')
 
@@ -67,7 +69,7 @@ class InvalidSignUpTests(TestCase):
         self.assertFalse(User.objects.exists())
 
     def test_post_failed_short_password(self):
-        """短いパスワード"""
+        """短いパスワードのユーザ"""
         less_password_data = {
             'username': 'example',
             'email': 'sample@example.com',
@@ -154,12 +156,82 @@ class InvalidSignUpTests(TestCase):
         }
         self.client.post(self.url, first_username_data)
 
-        second_username_data = {
-            'username': 'example',
-            'email': 'sample2@example.com',
-            'password1': 'success13046',
-            'password2': 'success13046'
+    def test_not_create_user(self):
+        """ユーザが存在しないことを確認"""
+        self.assertFalse(User.objects.exists())
+
+
+class LoginTest(TestCase):
+
+    def setUp(self):
+        User.objects.create_user('ytaisei', 'example@gmail.com', 'example13046')
+        self.url = reverse("user:login")
+        self.home_url = reverse("user:home")
+        self.client = Client()
+
+    def test_correct_login(self):
+        """正しいログイン"""
+        data = {
+            'username': 'ytaisei',
+            'password': 'example13046'
         }
-        res = self.client.post(self.url, second_username_data)
-        self.assertEquals(res.status_code, 200)
-        self.assertTrue(res.context.get('form').errors)
+        self.assertNotIn(SESSION_KEY, self.client.session)
+        response = self.client.post(self.url, data)
+
+        # 302: リクエストされたリソースが一時的にLocationで示されたURLへ移動したことを示す
+        self.assertEqual(response .status_code, 302)
+        self.assertRedirects(response, self.home_url)
+        self.assertIn(SESSION_KEY, self.client.session)
+
+    def test_incorrect_username_login(self):
+        """異なる,存在しないユーザ名でのログイン"""
+        data = {
+            'username': 'yasui',
+            'password': 'example13046'
+        }
+        response = self.client.post(self.url, data)
+        self.assertNotIn(SESSION_KEY, self.client.session)
+
+        self.assertEqual(response .status_code, 200)
+        self.assertFormError(response, 'form', '', '正しいユーザー名とパスワードを入力してください。どちらのフィールドも大文字と小文字は区別されます。')
+        self.assertNotIn(SESSION_KEY, self.client.session)
+
+    def test_incorrect_password_login(self):
+        """間違ったパスワードでのログイン"""
+        data = {
+            'username': 'ytaisei',
+            'password': 'example'
+        }
+        response = self.client.post(self.url, data)
+        self.assertNotIn(SESSION_KEY, self.client.session)
+
+        self.assertEqual(response .status_code, 200)
+        self.assertFormError(response, 'form', '', '正しいユーザー名とパスワードを入力してください。どちらのフィールドも大文字と小文字は区別されます。')
+        self.assertNotIn(SESSION_KEY, self.client.session)
+
+
+class LogoutTest(TestCase):
+    """ログアウトのテスト"""
+    @classmethod
+    def setUpTestData(cls):
+        User.objects.create_user('ytaisei', 'example@gmail.com', 'example13046')
+
+    def setUp(self):
+        self.client.login(username='ytaisei', password='example13046')
+        self.assertIn(SESSION_KEY, self.client.session)
+        self.url = reverse('user:logout')
+
+    def test_success_logout(self):
+        response = self.client.get(self.url)
+        self.assertRedirects(response, reverse('user:signup'))
+        self.assertNotIn(SESSION_KEY, self.client.session)
+
+
+class RedirectNotLoginUser(TestCase):
+    """ログインしていない状態で/homeに遷移する"""
+    def setUp(self):
+        self.home_url = reverse('user:home')
+
+    def test_redirect_not_login_user(self):
+        response = self.client.get(self.home_url)
+        self.assertRedirects(response, '/login/?next=%2Fhome%2F')
