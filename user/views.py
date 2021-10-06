@@ -2,16 +2,13 @@ from django.views.generic import TemplateView, CreateView
 from django.http.response import HttpResponseRedirect
 from django.contrib.auth import login
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .forms import SignUpForm
 
 
-class HomeView(TemplateView):
+class HomeView(LoginRequiredMixin, TemplateView):
 	template_name = "user/home.html"
-
-
-class LogoutView(TemplateView):
-	template_name = "user/logout.html"
 
 
 class SignUpView(CreateView):
