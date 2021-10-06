@@ -71,15 +71,8 @@ class InvalidSignUpTests(TestCase):
         self.assertTrue(res.context.get('form').errors)
         self.assertFalse(User.objects.exists())
 
-
-class LessPasswordSignUpTests(TestCase):
-
-    def setUp(self):
-        """短いパスワードのユーザを作成"""
-        self.url = reverse('user:signup')
-
     def test_post_failed_short_password(self):
-        """短いパスワード"""
+        """短いパスワードのユーザ"""
         less_password_data = {
             'username': 'example',
             'email': 'sample@example.com',
