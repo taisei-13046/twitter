@@ -6,15 +6,12 @@ from django.contrib.auth import SESSION_KEY
 
 class HomeViewTests(TestCase):
     """HomeViewのテストクラス"""
+    @classmethod
+    def setUpTestData(cls):
+        User.objects.create_user('ytaisei', 'example@gmail.com', 'example13046')
+
     def setUp(self):
-        url = reverse('user:signup')
-        data = {
-            'username': 'example',
-            'email': 'sample@example.com',
-            'password1': 'abcdef123456',
-            'password2': 'abcdef123456'
-        }
-        self.response = self.client.post(url, data)
+        self.client.login(username='ytaisei', password='example13046')
 
     def test_get(self):
         """GET メソッドでアクセスしてステータスコード200を返されることを確認"""
@@ -215,8 +212,11 @@ class LoginTest(TestCase):
 
 class LogoutTest(TestCase):
     """ログアウトのテスト"""
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         User.objects.create_user('ytaisei', 'example@gmail.com', 'example13046')
+
+    def setUp(self):
         self.client.login(username='ytaisei', password='example13046')
         self.assertIn(SESSION_KEY, self.client.session)
         self.url = reverse('user:logout')
