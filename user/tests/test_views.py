@@ -15,7 +15,7 @@ class HomeViewTests(TestCase):
 
     def test_get(self):
         """GET メソッドでアクセスしてステータスコード200を返されることを確認"""
-        response = self.client.get(reverse('user:home'))
+        response = self.client.get(reverse('blog:home'))
         self.assertEqual(response.status_code, 200)
 
 
@@ -39,7 +39,7 @@ class SuccessfulSignUpTests(TestCase):
             'password2': 'abcdef123456'
         }
         self.response = self.client.post(url, data)
-        self.home_url = reverse('user:home')
+        self.home_url = reverse('blog:home')
 
     def test_redirection(self):
         """リダイレクト先のページを検証"""
@@ -166,7 +166,7 @@ class LoginTest(TestCase):
     def setUp(self):
         User.objects.create_user('ytaisei', 'example@gmail.com', 'example13046')
         self.url = reverse("user:login")
-        self.home_url = reverse("user:home")
+        self.home_url = reverse("blog:home")
         self.client = Client()
 
     def test_correct_login(self):
@@ -230,8 +230,8 @@ class LogoutTest(TestCase):
 class RedirectNotLoginUser(TestCase):
     """ログインしていない状態で/homeに遷移する"""
     def setUp(self):
-        self.home_url = reverse('user:home')
+        self.home_url = reverse('blog:home')
 
     def test_redirect_not_login_user(self):
         response = self.client.get(self.home_url)
-        self.assertRedirects(response, '/login/?next=%2Fhome%2F')
+        self.assertRedirects(response, '/login/?next=/blog/')

@@ -1,0 +1,146 @@
+from django.test import TestCase, Client
+from django.urls import reverse
+from django.contrib.auth.models import User
+from .models import Post
+
+# Create your tests here.
+
+
+class CreateTweetTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        User.objects.create_user('ytaisei', 'example@gmail.com', 'example13046')
+
+    def setUp(self):
+        self.client.login(username='ytaisei', password='example13046')
+        self.url = reverse('blog:create')
+
+    def test_with_create_view(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_post_success_form(self):
+        response = self.client.post(self.url, {'content': 'success'})
+        self.assertRedirects(response, reverse('blog:home'))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Post.objects.count(), 1)
+        post = Post.objects.get(id=1)
+        self.assertEqual(post.content, 'success')
+
+    def test_post_empty_form(self):
+        response = self.client.post(self.url, {'content': ''})
+        self.assertEqual(Post.objects.count(), 0)
+        self.assertFormError(response, 'form', 'content', 'このフィールドは必須です。')
+
+
+class TweetListTest(TestCase):
+
+    def setUp(self):
+        self.user1 = User.objects.create_user('user1', 'example@gmail.com', 'example13046')
+        self.user2 = User.objects.create_user('user2', 'example@gmail.com', 'example13046')
+        self.user1_tweet = Post.objects.create(content='user1', author=self.user1)
+        self.user2_tweet = Post.objects.create(content='user2', author=self.user2)
+        self.url = reverse('blog:home')
+
+    def test_tweet_list(self):
+        self.client.login(username='user1', password='example13046')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerysetEqual(
+            response.context['post_list'],
+            ['<Post: user2>', '<Post: user1>'],
+            ordered=True,
+        )
+        self.assertContains(response, self.user1.username)
+        self.assertContains(response, self.user1_tweet.content)
+        self.assertContains(response, self.user2.username)
+        self.assertContains(response, self.user2_tweet.content)
+
+
+class DetailTweetTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user('ytaisei', 'example@gmail.com', 'example13046')
+        self.client.login(username='ytaisei', password='example13046')
+        self.tweet = Post.objects.create(content='detail', author=self.user)
+        self.url = reverse('blog:detail', kwargs={'pk': self.tweet.pk})
+
+    def test_tweet_detail(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.tweet.content)
+        self.assertContains(response, self.user.username)
+
+
+class UpdateTweetTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user('ytaisei', 'example@gmail.com', 'example13046')
+        self.tweet = Post.objects.create(content='update', author=self.user)
+        self.url = reverse('blog:update', kwargs={'pk': self.tweet.pk})
+
+    def test_with_create_view(self):
+        self.client.login(username='ytaisei', password='example13046')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_with_correct_update(self):
+        self.client.login(username='ytaisei', password='example13046')
+        response = self.client.post(self.url, {'content': 'updated tweet'})
+        self.assertRedirects(response, reverse('blog:home'))
+        post = Post.objects.get(id=self.tweet.pk)
+        self.assertEqual(post.content, 'updated tweet')
+
+    def test_post_empty_update_form(self):
+        self.client.login(username='ytaisei', password='example13046')
+        response = self.client.post(self.url, {'content': ''})
+        self.assertFormError(response, 'form', 'content', 'このフィールドは必須です。')
+
+    def test_with_incorrect_user_update(self):
+        User.objects.create_user('incorrect', 'example@gmail.com', 'example13046')
+        self.client.login(username='incorrect', password='example13046')
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 403)
+
+
+class DeleteTweetTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user('ytaisei', 'example@gmail.com', 'example13046')
+        self.tweet = Post.objects.create(content='delete', author=self.user)
+        self.url = reverse('blog:delete', kwargs={'pk': self.tweet.pk})
+
+    def test_with_delete_view(self):
+        self.client.login(username='ytaisei', password='example13046')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_success_delete_tweet(self):
+        self.assertEqual(Post.objects.count(), 1)
+        self.client.login(username='ytaisei', password='example13046')
+        response = self.client.delete(self.url)
+        self.assertRedirects(response, reverse('blog:home'))
+        self.assertEqual(Post.objects.count(), 0)
+
+    def test_with_incorrect_user_delete(self):
+        User.objects.create_user('incorrect', 'example@gmail.com', 'example13046')
+        self.client.login(username='incorrect', password='example13046')
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, 403)
+
+
+class PostModelTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        User.objects.create_user('ytaisei', 'example@gmail.com', 'example13046')
+
+    def setUp(self):
+        self.client.login(username='ytaisei', password='example13046')
+        self.url = reverse('blog:create')
+
+    def test_with_over_max_length(self):
+        content = 'x' * 141
+        self.client.post(self.url, {'content': content})
+        self.assertEqual(Post.objects.count(), 0)

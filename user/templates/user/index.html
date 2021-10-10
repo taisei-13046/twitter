@@ -22,17 +22,19 @@
     <div class="col">
         <br>
         <h1 class="home-title">Twitterを始めよう</h1>
-        <form method="POST">
-            {% csrf_token %}
-            {{ form.non_field_errors }}
-            {% for field in form %}
+        <div class="col">
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                {% for field in form %}
                 {{ field.label }}
-            <div class="user-form">{{ field|add_class:"form-control"}}</div>
+                <div class="user-form">{{ field|add_class:"form-control"}}</div>
                 {{ field.errors }}
                 <br>
-            {% endfor %}
-            <button type="submit" class="btn btn-primary">登録</button>
-        </form>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary">登録</button>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

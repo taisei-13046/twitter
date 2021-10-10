@@ -1,0 +1,16 @@
+.wrapper {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+}
+
+.profile-box{
+  background-color: #8080801c;
+  padding: 5px;
+  border-radius: 25px;
+  margin-right: 50px;
+  padding: 15px;
+}
+
+.post-box {
+    margin: 100px
+}
