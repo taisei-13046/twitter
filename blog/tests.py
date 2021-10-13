@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from .models import Post
 
+import time
 # Create your tests here.
 
 
@@ -40,6 +41,7 @@ class TweetListTest(TestCase):
         self.user1 = User.objects.create_user('user1', 'example@gmail.com', 'example13046')
         self.user2 = User.objects.create_user('user2', 'example@gmail.com', 'example13046')
         self.user1_tweet = Post.objects.create(content='user1', author=self.user1)
+        time.sleep(0.1)
         self.user2_tweet = Post.objects.create(content='user2', author=self.user2)
         self.url = reverse('blog:home')
 
