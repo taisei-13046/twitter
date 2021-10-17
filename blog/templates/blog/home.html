@@ -48,7 +48,7 @@
     {% for post in post_list %}
     <div class="post-box" >
       <hr />
-      <p>コメント：{{post.content}}</p>
+        <div style="font-family: 'HanziPen SC'">{{post.content|linebreaksbr}}</div>
       <p>
         {{post.author}}
         <small class="white-important full-width flex-row-reverse">
