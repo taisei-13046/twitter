@@ -1,20 +1,15 @@
-from django.views.generic import TemplateView, CreateView
+from django.views.generic import CreateView
 from django.http.response import HttpResponseRedirect
 from django.contrib.auth import login
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .forms import SignUpForm
-
-
-class HomeView(LoginRequiredMixin, TemplateView):
-	template_name = "user/home.html"
 
 
 class SignUpView(CreateView):
 	form_class = SignUpForm
 	template_name = "user/index.html"
-	success_url = reverse_lazy('user:home')
+	success_url = reverse_lazy('blog:home')
 
 	def form_valid(self, form):
 		user = form.save()
