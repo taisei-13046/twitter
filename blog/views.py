@@ -1,6 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import CreateView, View, DetailView, DeleteView, UpdateView
-from .forms import PostCreateForm
+from .forms import PostCreateForm, PostUpdateForm
 from django.urls import reverse_lazy
 from django.shortcuts import render
 
@@ -39,7 +39,7 @@ class UpdateTweetView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """更新"""
     model = Post
     template_name = 'blog/update.html'
-    form_class = PostCreateForm
+    form_class = PostUpdateForm
     success_url = reverse_lazy('blog:home')
 
     def test_func(self):

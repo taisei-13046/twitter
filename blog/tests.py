@@ -34,6 +34,11 @@ class CreateTweetTest(TestCase):
         self.assertEqual(Post.objects.count(), 0)
         self.assertFormError(response, 'form', 'content', 'このフィールドは必須です。')
 
+    def test_with_over_max_length(self):
+        content = 'x' * 141
+        self.client.post(self.url, {'content': content})
+        self.assertEqual(Post.objects.count(), 0)
+
 
 class TweetListTest(TestCase):
 
@@ -130,19 +135,3 @@ class DeleteTweetTest(TestCase):
         self.client.login(username='incorrect', password='example13046')
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, 403)
-
-
-class PostModelTest(TestCase):
-
-    @classmethod
-    def setUpTestData(cls):
-        User.objects.create_user('ytaisei', 'example@gmail.com', 'example13046')
-
-    def setUp(self):
-        self.client.login(username='ytaisei', password='example13046')
-        self.url = reverse('blog:create')
-
-    def test_with_over_max_length(self):
-        content = 'x' * 141
-        self.client.post(self.url, {'content': content})
-        self.assertEqual(Post.objects.count(), 0)
