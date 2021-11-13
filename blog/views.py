@@ -1,10 +1,11 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import CreateView, View, DetailView, DeleteView, UpdateView
+from django.views.generic import CreateView, View, DetailView, DeleteView, UpdateView, ListView
 from .forms import PostCreateForm, PostUpdateForm
 from django.urls import reverse_lazy
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.models import User
 
-from .models import Post
+from .models import Post, Follow
 
 
 class HomeView(LoginRequiredMixin, View):
@@ -56,3 +57,27 @@ class DeleteTweetView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
+
+
+class FollowingListView(ListView):
+    model = Follow
+    template_name = 'blog/following.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = get_object_or_404(User, username=self.kwargs['username'])
+        following_list = user.following.values_list("follow_to")
+        context['following_list'] = User.objects.filter(id__in=following_list)
+        return context
+
+
+class FollowerListView(ListView):
+    model = Follow
+    template_name = 'blog/follower.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = get_object_or_404(User, username=self.kwargs['username'])
+        follower_list = user.follower.values_list("follow_from")
+        context['follower_list'] = User.objects.filter(id__in=follower_list)
+        return context
