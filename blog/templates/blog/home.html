@@ -43,8 +43,10 @@
         </div>
         <button onclick="location.href='create'" class="btn btn-primary" >Tweet</button>
     </div>
-    <a href="{% url 'blog:following' user.username %}" style="color: gray;"><h4>following list</h4></a>
-    <a href="{% url 'blog:follower' user.username %}" style="color: gray;"><h4>follower list</h4></a>
+    <div style="margin-top: 20px">
+      <a href="{% url 'blog:following' user.username %}" style="color: gray;"><h4>following list</h4></a>
+      <a href="{% url 'blog:follower' user.username %}" style="color: gray;"><h4>follower list</h4></a>
+    </div>
   </div>
   <div>
     {% for post in post_list %}
@@ -52,7 +54,7 @@
       <hr />
         <div style="font-family: 'HanziPen SC'">{{post.content|linebreaksbr}}</div>
       <p>
-        {{post.author}}
+        <a href="{% url 'blog:follow_allow' post.author %}" style="color: gray">{{post.author}}</a>
         <small class="white-important full-width flex-row-reverse">
           {{ post.created_at | date:"H:i l, d.m.y" }}
         </small>

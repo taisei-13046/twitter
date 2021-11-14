@@ -1,8 +1,8 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import CreateView, View, DetailView, DeleteView, UpdateView, ListView
+from django.views.generic import CreateView, DetailView, DeleteView, UpdateView, ListView
 from .forms import PostCreateForm, PostUpdateForm
 from django.urls import reverse_lazy
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 
 from .models import Post, Follow
@@ -71,10 +71,6 @@ class FollowingListView(LoginRequiredMixin, ListView):
         context['following_list'] = User.objects.filter(id__in=following_list)
         return context
 
-    def test_func(self):
-        post = self.get_object()
-        return self.request.user == post.author
-
 
 class FollowerListView(LoginRequiredMixin, ListView):
     model = Follow
@@ -87,6 +83,32 @@ class FollowerListView(LoginRequiredMixin, ListView):
         context['follower_list'] = User.objects.filter(id__in=follower_list)
         return context
 
-    def test_func(self):
-        post = self.get_object()
-        return self.request.user == post.author
+
+class FollowAllowView(ListView):
+    model = Follow
+    template_name = 'blog/follow_allow.html'
+    success_url = reverse_lazy('blog:home')
+
+    def get_context_data(self, **kwargs):
+        context = super(FollowAllowView, self).get_context_data(**kwargs)
+        login_user = self.request.user
+        target_user = get_object_or_404(User, username=self.kwargs['username'])
+        can_follow = Follow.objects.filter(follow_to=target_user, follow_from=login_user).count() == 0
+        same_user = login_user == target_user
+        context['target_user'] = target_user
+        context['can_follow'] = can_follow
+        context['same_user'] = same_user
+        return context
+
+    def post(self, request, **kwargs):
+        if request.user.id is not None:
+            user = get_object_or_404(User, username=self.kwargs['username'])
+            follow_relation = Follow.objects.filter(follow_to=user, follow_from=request.user)
+            if 'follow' in request.POST:
+                new_follow = Follow(follow_to=user, follow_from=request.user)
+                if follow_relation.count() == 0:
+                    new_follow.save()
+            elif 'unfollow' in request.POST:
+                if follow_relation.count() == 1:
+                    follow_relation.delete()
+        return self.get(self, request, **kwargs)

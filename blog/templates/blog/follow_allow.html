@@ -1,0 +1,46 @@
+{% extends "blog/base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% block title %}Tweet{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'blog:home' %}">Twitter</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainMenu">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {{ user.username }}
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userMenu">
+                        <a class="dropdown-item" href="#">My account</a>
+                        <div class="dropdown-divider"></div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div>
+    {% if same_user %}
+        <h3>you cannot follow yourself</h3>
+        <button class="btn btn-primary"><a href="{% url 'blog:home' %}" style="color: white">back to home</a></button>
+    {% else %}
+        <form method="POST">
+            {% csrf_token %}
+            {% if can_follow %}
+                <h3>Do you want to follow {{target_user}} ??</h3>
+                <button class="btn btn-primary" name="follow" type="submit" >FOLLOW</button>
+            {% else %}
+                <h3>Do you want to unfollow {{target_user}} ??</h3>
+                <button class="btn btn-primary" name="unfollow" type="submit" >UNFOLLOW</button>
+            {% endif %}
+        </form>
+    {% endif %}
+</div>
+</div>
+{% endblock %}
