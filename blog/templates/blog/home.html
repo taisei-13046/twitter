@@ -28,15 +28,15 @@
 </nav>
 <div class="wrapper">
   <div class="profile">
-    <div>Ready Tweet</div>
-    <div class="profile-box">
+    <h4>Ready Tweet</h4>
+    <div class="profile-box" style="text-align: center">
       <div>{{ user.username }}</div>
-        <div style="display: flex;">
-          <div>
-            <div>Follower</div>
-            <div>2</div>
+        <div style="justify-content: center; display: flex">
+          <div style="margin-right: 5px">
+            <div>Following</div>
+            <div>{{ following_count }}</div>
           </div>
-          <div>
+          <div style="margin-left: 5px">
             <div>Follower</div>
             <div>2</div>
           </div>

@@ -8,14 +8,15 @@ from django.contrib.auth.models import User
 from .models import Post, Follow
 
 
-class HomeView(LoginRequiredMixin, View):
+class HomeView(LoginRequiredMixin, ListView):
+    model = User
+    template_name = "blog/home.html"
 
-    def get(self, request):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         post_list = Post.objects.all()
-        context = {
-            'post_list': post_list,
-        }
-        return render(request, 'blog/home.html', context)
+        context['post_list'] = post_list
+        return context
 
 
 class CreateTweetView(LoginRequiredMixin, CreateView):
@@ -59,7 +60,7 @@ class DeleteTweetView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user == post.author
 
 
-class FollowingListView(ListView):
+class FollowingListView(LoginRequiredMixin, ListView):
     model = Follow
     template_name = 'blog/following.html'
 
@@ -70,8 +71,12 @@ class FollowingListView(ListView):
         context['following_list'] = User.objects.filter(id__in=following_list)
         return context
 
+    def test_func(self):
+        post = self.get_object()
+        return self.request.user == post.author
 
-class FollowerListView(ListView):
+
+class FollowerListView(LoginRequiredMixin, ListView):
     model = Follow
     template_name = 'blog/follower.html'
 
@@ -81,3 +86,7 @@ class FollowerListView(ListView):
         follower_list = user.follower.values_list("follow_from")
         context['follower_list'] = User.objects.filter(id__in=follower_list)
         return context
+
+    def test_func(self):
+        post = self.get_object()
+        return self.request.user == post.author
