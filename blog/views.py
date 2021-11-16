@@ -4,6 +4,8 @@ from .forms import PostCreateForm, PostUpdateForm
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
+from django.contrib import messages
+from django.http import HttpResponse, HttpResponseNotFound
 
 from .models import Post, Follow
 
@@ -106,8 +108,10 @@ class FollowAllowView(ListView):
         return context
 
     def post(self, request, **kwargs):
+        user = get_object_or_404(User, username=self.kwargs['username'])
+        if request.user == user:
+            return HttpResponseNotFound('<h1>自分自身をフォローすることはできません</h1>')
         if request.user.id is not None:
-            user = get_object_or_404(User, username=self.kwargs['username'])
             follow_relation = Follow.objects.filter(follow_to=user, follow_from=request.user)
             if 'follow' in request.POST:
                 new_follow = Follow(follow_to=user, follow_from=request.user)

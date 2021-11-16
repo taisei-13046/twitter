@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import Post
+from .models import Post, Follow
 
 import time
 # Create your tests here.
@@ -135,3 +135,43 @@ class DeleteTweetTest(TestCase):
         self.client.login(username='incorrect', password='example13046')
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, 403)
+
+
+class FollowTest(TestCase):
+
+    def setUp(self):
+        self.user1 = User.objects.create_user('user1', 'example@gmail.com', 'example13046')
+        self.user2 = User.objects.create_user('user2', 'example@gmail.com', 'example13046')
+        self.url1 = reverse('blog:follow_allow', kwargs={'username': self.user1.username})
+        self.url2 = reverse('blog:follow_allow', kwargs={'username': self.user2.username})
+
+    def test_success_create_follow(self):
+        self.client.login(username='user1', password='example13046')
+        response = self.client.post(self.url2, {'follow': 'follow'})
+        self.assertEqual(response.status_code, 200)
+        following_list = self.user1.following.values_list('follow_to')
+        following = User.objects.filter(id__in=following_list)
+        for following_name in following:
+            self.assertEqual(following_name.username, self.user2.username)
+
+    def test_success_delete_follow(self):
+        self.client.login(username='user1', password='example13046')
+        follow_response = self.client.post(self.url2, {'follow': 'follow'})
+        self.assertEqual(follow_response.status_code, 200)
+        following_list = self.user1.following.values_list('follow_to')
+        following = User.objects.filter(id__in=following_list)
+        for following_name in following:
+            self.assertEqual(following_name.username, self.user2.username)
+
+        unfollow_response = self.client.post(self.url2, {'unfollow': 'unfollow'})
+        self.assertEqual(unfollow_response.status_code, 200)
+        following_count = User.objects.filter(id__in=following_list).count()
+        self.assertEqual(following_count, 0)
+
+    def test_fail_create_follow(self):
+        self.client.login(username='user1', password='example13046')
+        follow_response = self.client.post(self.url1, {'follow': 'follow'})
+        self.assertEqual(follow_response.status_code, 404)
+        following_list = self.user1.following.values_list('follow_to')
+        following_count = User.objects.filter(id__in=following_list).count()
+        self.assertEqual(following_count, 0)
