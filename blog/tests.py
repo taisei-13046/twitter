@@ -1,7 +1,7 @@
-from django.test import TestCase, Client
+from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import Post, Follow
+from .models import Post
 
 import time
 # Create your tests here.

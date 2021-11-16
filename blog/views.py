@@ -4,8 +4,7 @@ from .forms import PostCreateForm, PostUpdateForm
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from django.contrib import messages
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponseNotFound
 
 from .models import Post, Follow
 
