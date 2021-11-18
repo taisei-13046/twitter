@@ -90,13 +90,13 @@ class FollowerListView(LoginRequiredMixin, ListView):
         return context
 
 
-class FollowAllowView(ListView):
+class FollowBaseView(ListView):
     model = Follow
-    template_name = 'blog/follow_allow.html'
+    template_name = 'blog/follow.html'
     success_url = reverse_lazy('blog:home')
 
     def get_context_data(self, **kwargs):
-        context = super(FollowAllowView, self).get_context_data(**kwargs)
+        context = super(FollowBaseView, self).get_context_data(**kwargs)
         login_user = self.request.user
         target_user = get_object_or_404(User, username=self.kwargs['username'])
         can_follow = Follow.objects.filter(follow_to=target_user, follow_from=login_user).count() == 0
@@ -106,6 +106,8 @@ class FollowAllowView(ListView):
         context['same_user'] = same_user
         return context
 
+
+class FollowAndUnfollowView(FollowBaseView):
     def post(self, request, **kwargs):
         user = get_object_or_404(User, username=self.kwargs['username'])
         if request.user == user:
@@ -116,7 +118,7 @@ class FollowAllowView(ListView):
                 new_follow = Follow(follow_to=user, follow_from=request.user)
                 if follow_relation.count() == 0:
                     new_follow.save()
-            elif 'unfollow' in request.POST:
+            if 'unfollow' in request.POST:
                 if follow_relation.count() == 1:
                     follow_relation.delete()
         return self.get(self, request, **kwargs)
