@@ -24,7 +24,7 @@ class SignUpView(CreateView):
 
 class FollowView(ListView):
 	model = Follow
-	template_name = 'user/follow_home.html'
+	template_name = 'user/follow.html'
 	success_url = reverse_lazy('blog:home')
 
 	def get_context_data(self, **kwargs):
@@ -38,35 +38,17 @@ class FollowView(ListView):
 		context['same_user'] = same_user
 		return context
 
-
-class FollowCreateView(ListView):
-	model = Follow
-	template_name = 'user/follow.html'
-	success_url = reverse_lazy('blog:home')
-
 	def post(self, request, **kwargs):
 		user = get_object_or_404(User, username=self.kwargs['username'])
 		if request.user == user:
 			return HttpResponseNotFound('<h1>自分自身をフォローすることはできません</h1>')
 		if request.user.id is not None:
 			follow_relation = Follow.objects.filter(follow_to=user, follow_from=request.user)
-			new_follow = Follow(follow_to=user, follow_from=request.user)
-			if follow_relation.count() == 0:
-				new_follow.save()
-		return self.get(self, request, **kwargs)
-
-
-class FollowDeleteView(ListView):
-	model = Follow
-	template_name = 'user/unfollow.html'
-	success_url = reverse_lazy('blog:home')
-
-	def post(self, request, **kwargs):
-		user = get_object_or_404(User, username=self.kwargs['username'])
-		if request.user == user:
-			return HttpResponseNotFound('<h1>自分自身をフォローすることはできません</h1>')
-		if request.user.id is not None:
-			follow_relation = Follow.objects.filter(follow_to=user, follow_from=request.user)
-			if follow_relation.count() == 1:
-				follow_relation.delete()
+			if 'follow' in request.POST:
+				new_follow = Follow(follow_to=user, follow_from=request.user)
+				if follow_relation.count() == 0:
+					new_follow.save()
+			if 'unfollow' in request.POST:
+				if follow_relation.count() == 1:
+					follow_relation.delete()
 		return self.get(self, request, **kwargs)
