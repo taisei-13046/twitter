@@ -26,21 +26,11 @@
     </div>
 </nav>
 <div>
-    {% if same_user %}
-        <h3>you cannot follow yourself</h3>
-        <button class="btn btn-primary"><a href="{% url 'blog:home' %}" style="color: white">back to home</a></button>
-    {% else %}
-        <form method="POST">
-            {% csrf_token %}
-            {% if can_follow %}
-                <h3>Do you want to follow {{target_user}} ??</h3>
-                <button class="btn btn-primary" name="follow" type="submit" >FOLLOW</button>
-            {% else %}
-                <h3>Do you want to unfollow {{target_user}} ??</h3>
-                <button class="btn btn-primary" name="unfollow" type="submit" >UNFOLLOW</button>
-            {% endif %}
-        </form>
-    {% endif %}
 </div>
+    <form method="POST">
+        {% csrf_token %}
+        <h3>Do you want to unfollow {{target_user}} ??</h3>
+        <button class="btn btn-primary"><a href="{% url 'blog:home' %}" style="color: white">Unfollow</a></button>
+    </form>
 </div>
 {% endblock %}

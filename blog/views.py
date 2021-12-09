@@ -4,9 +4,9 @@ from .forms import PostCreateForm, PostUpdateForm
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from django.http import HttpResponseNotFound
 
-from .models import Post, Follow
+from .models import Post
+from user.models import Follow
 
 
 class HomeView(LoginRequiredMixin, ListView):
@@ -88,37 +88,3 @@ class FollowerListView(LoginRequiredMixin, ListView):
         follower_list = user.follower.values_list("follow_from")
         context['follower_list'] = User.objects.filter(id__in=follower_list)
         return context
-
-
-class FollowBaseView(ListView):
-    model = Follow
-    template_name = 'blog/follow.html'
-    success_url = reverse_lazy('blog:home')
-
-    def get_context_data(self, **kwargs):
-        context = super(FollowBaseView, self).get_context_data(**kwargs)
-        login_user = self.request.user
-        target_user = get_object_or_404(User, username=self.kwargs['username'])
-        can_follow = Follow.objects.filter(follow_to=target_user, follow_from=login_user).count() == 0
-        same_user = login_user == target_user
-        context['target_user'] = target_user
-        context['can_follow'] = can_follow
-        context['same_user'] = same_user
-        return context
-
-
-class FollowAndUnfollowView(FollowBaseView):
-    def post(self, request, **kwargs):
-        user = get_object_or_404(User, username=self.kwargs['username'])
-        if request.user == user:
-            return HttpResponseNotFound('<h1>自分自身をフォローすることはできません</h1>')
-        if request.user.id is not None:
-            follow_relation = Follow.objects.filter(follow_to=user, follow_from=request.user)
-            if 'follow' in request.POST:
-                new_follow = Follow(follow_to=user, follow_from=request.user)
-                if follow_relation.count() == 0:
-                    new_follow.save()
-            if 'unfollow' in request.POST:
-                if follow_relation.count() == 1:
-                    follow_relation.delete()
-        return self.get(self, request, **kwargs)

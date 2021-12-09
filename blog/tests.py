@@ -142,8 +142,8 @@ class FollowTest(TestCase):
     def setUp(self):
         self.user1 = User.objects.create_user('user1', 'example@gmail.com', 'example13046')
         self.user2 = User.objects.create_user('user2', 'example@gmail.com', 'example13046')
-        self.url1 = reverse('blog:follow_allow', kwargs={'username': self.user1.username})
-        self.url2 = reverse('blog:follow_allow', kwargs={'username': self.user2.username})
+        self.url1 = reverse('blog:follow', kwargs={'username': self.user1.username})
+        self.url2 = reverse('blog:follow', kwargs={'username': self.user2.username})
 
     def test_success_create_follow(self):
         self.client.login(username='user1', password='example13046')
