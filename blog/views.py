@@ -15,11 +15,10 @@ class HomeView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        post_list = Post.objects.all()
         login_user = self.request.user
         context['following_count'] = Follow.objects.filter(follow_from=login_user).count()
         context['follower_count'] = Follow.objects.filter(follow_to=login_user).count()
-        context['post_list'] = post_list
+        context['post_list'] = Post.objects.all()
         return context
 
 
