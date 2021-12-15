@@ -1,10 +1,10 @@
 from django.views.generic import CreateView, ListView
-from django.http.response import HttpResponseRedirect
 from django.contrib.auth import login
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from django.http import HttpResponseNotFound
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect, Http404
 
 from .forms import SignUpForm
 from .models import Follow
@@ -22,10 +22,9 @@ class SignUpView(CreateView):
 		return HttpResponseRedirect(self.get_success_url())
 
 
-class FollowView(ListView):
+class FollowIndexView(ListView):
 	model = Follow
-	template_name = 'user/follow.html'
-	success_url = reverse_lazy('blog:home')
+	template_name = 'user/follow_index.html'
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
@@ -38,17 +37,29 @@ class FollowView(ListView):
 		context['same_user'] = same_user
 		return context
 
-	def post(self, request, **kwargs):
-		user = get_object_or_404(User, username=self.kwargs['username'])
-		if request.user == user:
-			return HttpResponseNotFound('<h1>自分自身をフォローすることはできません</h1>')
-		if request.user.id is not None:
-			follow_relation = Follow.objects.filter(follow_to=user, follow_from=request.user)
-			if 'follow' in request.POST:
-				new_follow = Follow(follow_to=user, follow_from=request.user)
-				if follow_relation.count() == 0:
-					new_follow.save()
-			if 'unfollow' in request.POST:
-				if follow_relation.count() == 1:
-					follow_relation.delete()
-		return self.get(self, request, **kwargs)
+
+@login_required
+def follow_view(request, *args, **kwargs):
+	try:
+		follower = request.user
+		following = User.objects.get(username=kwargs['username'])
+	except User.DoesNotExist:
+		raise Http404('this user does not exist.')
+	follow_relation = Follow.objects.filter(follow_to=following, follow_from=follower)
+	if not follow_relation.count():
+		new_follow = Follow(follow_to=following, follow_from=follower)
+		new_follow.save()
+	return HttpResponseRedirect(reverse_lazy('blog:home'))
+
+
+@login_required
+def unfollow_view(request, *args, **kwargs):
+	try:
+		follower = request.user
+		following = User.objects.get(username=kwargs['username'])
+	except User.DoesNotExist:
+		raise Http404('this user does not exist.')
+	follow_relation = Follow.objects.filter(follow_to=following, follow_from=follower)
+	if follow_relation.count():
+		follow_relation.delete()
+	return HttpResponseRedirect(reverse_lazy('blog:home'))
