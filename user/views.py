@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, Http404
+from django.core.exceptions import PermissionDenied
 
 from .forms import SignUpForm
 from .models import Follow
@@ -45,6 +46,8 @@ def follow_view(request, *args, **kwargs):
 		following = User.objects.get(username=kwargs['username'])
 	except User.DoesNotExist:
 		raise Http404('this user does not exist.')
+	if follower == following:
+		raise PermissionDenied()
 	follow_relation = Follow.objects.filter(follow_to=following, follow_from=follower)
 	if not follow_relation.count():
 		new_follow = Follow(follow_to=following, follow_from=follower)
