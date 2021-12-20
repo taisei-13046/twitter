@@ -1,7 +1,11 @@
-{% extends "blog/base.html" %}
+{% extends "user/base.html" %}
 {% load static %}
 {% load widget_tweaks %}
 {% block title %}Tweet{% endblock %}
+
+{% block header %}
+  {% include 'blog/blog_header.html' %}
+{% endblock %}
 
 {% block content %}
 <div>
