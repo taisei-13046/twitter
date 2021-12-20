@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, Http404
 from django.core.exceptions import PermissionDenied
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .forms import SignUpForm
 from .models import Follow
@@ -23,9 +24,33 @@ class SignUpView(CreateView):
 		return HttpResponseRedirect(self.get_success_url())
 
 
-class FollowIndexView(ListView):
+class FollowingListView(LoginRequiredMixin, ListView):
 	model = Follow
-	template_name = 'user/follow_index.html'
+	template_name = 'follow/following.html'
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		user = get_object_or_404(User, username=self.kwargs['username'])
+		following_list = user.following.values_list("follow_to")
+		context['following_list'] = User.objects.filter(id__in=following_list)
+		return context
+
+
+class FollowerListView(LoginRequiredMixin, ListView):
+	model = Follow
+	template_name = 'follow/follower.html'
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		user = get_object_or_404(User, username=self.kwargs['username'])
+		follower_list = user.follower.values_list("follow_from")
+		context['follower_list'] = User.objects.filter(id__in=follower_list)
+		return context
+
+
+class FollowIndexView(LoginRequiredMixin, ListView):
+	model = Follow
+	template_name = 'follow/follow_index.html'
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)

@@ -61,27 +61,3 @@ class DeleteTweetView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
-
-
-class FollowingListView(LoginRequiredMixin, ListView):
-    model = Follow
-    template_name = 'blog/following.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user = get_object_or_404(User, username=self.kwargs['username'])
-        following_list = user.following.values_list("follow_to")
-        context['following_list'] = User.objects.filter(id__in=following_list)
-        return context
-
-
-class FollowerListView(LoginRequiredMixin, ListView):
-    model = Follow
-    template_name = 'blog/follower.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user = get_object_or_404(User, username=self.kwargs['username'])
-        follower_list = user.follower.values_list("follow_from")
-        context['follower_list'] = User.objects.filter(id__in=follower_list)
-        return context
