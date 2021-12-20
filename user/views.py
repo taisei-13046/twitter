@@ -1,6 +1,6 @@
 from django.views.generic import CreateView, ListView
 from django.contrib.auth import login
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -64,8 +64,8 @@ class FollowIndexView(LoginRequiredMixin, ListView):
 
 @login_required
 def follow_view(request, *args, **kwargs):
+	follower = request.user
 	try:
-		follower = request.user
 		following = User.objects.get(username=kwargs['username'])
 	except User.DoesNotExist:
 		raise Http404('this user does not exist.')
@@ -75,17 +75,17 @@ def follow_view(request, *args, **kwargs):
 	if not follow_relation.count():
 		new_follow = Follow(follow_to=following, follow_from=follower)
 		new_follow.save()
-	return HttpResponseRedirect(reverse_lazy('blog:home'))
+	return HttpResponseRedirect(reverse('blog:home'))
 
 
 @login_required
 def unfollow_view(request, *args, **kwargs):
+	follower = request.user
 	try:
-		follower = request.user
 		following = User.objects.get(username=kwargs['username'])
 	except User.DoesNotExist:
 		raise Http404('this user does not exist.')
 	follow_relation = Follow.objects.filter(follow_to=following, follow_from=follower)
 	if follow_relation.count():
 		follow_relation.delete()
-	return HttpResponseRedirect(reverse_lazy('blog:home'))
+	return HttpResponseRedirect(reverse('blog:home'))
