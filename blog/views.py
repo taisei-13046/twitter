@@ -22,6 +22,7 @@ class HomeView(LoginRequiredMixin, ListView):
         context['following_count'] = Follow.objects.filter(follow_from=login_user).count()
         context['follower_count'] = Follow.objects.filter(follow_to=login_user).count()
         context['post_list'] = Post.objects.all()
+        context['liked_list'] = Like.objects.filter(user=login_user).values_list('post', flat=True)
         return context
 
 
