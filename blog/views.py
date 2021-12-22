@@ -3,8 +3,12 @@ from django.views.generic import CreateView, DetailView, DeleteView, UpdateView,
 from .forms import PostCreateForm, PostUpdateForm
 from django.urls import reverse_lazy
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.http import Http404, JsonResponse
 
-from .models import Post
+
+from .models import Post, Like
 from user.models import Follow
 
 
@@ -60,3 +64,37 @@ class DeleteTweetView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
+
+
+@login_required
+@require_POST
+def like_view(request, pk):
+    try:
+        post = Post.objects.get(pk=pk)
+    except Post.DoesNotExist:
+        raise Http404('this post does not exist')
+    like = Like.objects.filter(post=post, user=request.user)
+    if not like:
+        Like.objects.create(post=post, user=request.user)
+    context = {
+        'liked': True,
+        'count': post.like__set.count()
+    }
+    return JsonResponse(context)
+
+
+@login_required
+@require_POST
+def unlike_view(request, pk):
+    try:
+        post = Post.objects.get(pk=pk)
+    except Post.DoesNotExist:
+        raise Http404('this post does not exist')
+    like = Like.objects.filter(post=post, user=request.user)
+    if like:
+        like.delete()
+    context = {
+        'liked': False,
+        'count': post.like__set.count()
+    }
+    return JsonResponse(context)
