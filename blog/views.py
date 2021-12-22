@@ -2,7 +2,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import CreateView, DetailView, DeleteView, UpdateView, ListView
 from .forms import PostCreateForm, PostUpdateForm
 from django.urls import reverse_lazy
-from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 
 from .models import Post
