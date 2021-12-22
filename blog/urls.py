@@ -10,4 +10,6 @@ urlpatterns = [
     path('<int:pk>/', views.DetailTweetView.as_view(), name="detail"),
     path('<int:pk>/update/', views.UpdateTweetView.as_view(), name="update"),
     path('<int:pk>/delete/', views.DeleteTweetView.as_view(), name="delete"),
+    path('<int:pk>/like/', views.like_view, name="like"),
+    path('<int:pk>/unlike/', views.unlike_view, name="unlike"),
 ]
