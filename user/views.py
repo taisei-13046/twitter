@@ -1,4 +1,4 @@
-from django.views.generic import CreateView, ListView
+from django.views.generic import CreateView, ListView, TemplateView
 from django.contrib.auth import login
 from django.urls import reverse, reverse_lazy
 from django.shortcuts import get_object_or_404
@@ -46,8 +46,7 @@ class FollowerListView(LoginRequiredMixin, ListView):
 		return context
 
 
-class FollowIndexView(LoginRequiredMixin, ListView):
-	model = Follow
+class FollowIndexView(LoginRequiredMixin, TemplateView):
 	template_name = 'follow/follow_index.html'
 
 	def get_context_data(self, **kwargs):
