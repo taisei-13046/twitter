@@ -54,10 +54,10 @@ class FollowIndexView(LoginRequiredMixin, ListView):
 		context = super().get_context_data(**kwargs)
 		login_user = self.request.user
 		target_user = get_object_or_404(User, username=self.kwargs['username'])
-		can_follow = Follow.objects.filter(follow_to=target_user, follow_from=login_user).count() == 0
+		has_followed = Follow.objects.filter(follow_to=target_user, follow_from=login_user).count() != 0
 		same_user = login_user == target_user
 		context['target_user'] = target_user
-		context['can_follow'] = can_follow
+		context['has_followed'] = has_followed
 		context['same_user'] = same_user
 		return context
 

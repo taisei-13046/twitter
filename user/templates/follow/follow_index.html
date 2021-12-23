@@ -15,12 +15,12 @@
     {% else %}
         <form method="POST">
             {% csrf_token %}
-            {% if can_follow %}
-                <h3>Do you want to follow {{target_user}} ??</h3>
-                <button class="btn btn-primary"><a href="{% url 'user:follow' target_user %}" style="color: white">FOLLOW</a></button>
-            {% else %}
+            {% if has_followed %}
                 <h3>Do you want to unfollow {{target_user}} ??</h3>
                 <button class="btn btn-primary"><a href="{% url 'user:unfollow' target_user %}" style="color: white">UNFOLLOW</a></button>
+            {% else %}
+                <h3>Do you want to follow {{target_user}} ??</h3>
+                <button class="btn btn-primary"><a href="{% url 'user:follow' target_user %}" style="color: white">FOLLOW</a></button>
             {% endif %}
         </form>
     {% endif %}
