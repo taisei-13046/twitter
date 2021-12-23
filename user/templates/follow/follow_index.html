@@ -9,7 +9,7 @@
 
 {% block content %}
 <div>
-    {% if same_user %}
+    {% if is_same_user %}
         <h3>you cannot follow yourself</h3>
         <button class="btn btn-primary"><a href="{% url 'blog:home' %}" style="color: white">back to home</a></button>
     {% else %}
