@@ -40,15 +40,15 @@ $(document).on('click', '#like', function(event){
         },
         dataType: 'json',
         success: function(response){
+            selector = document.getElementsByName(response.post_id);
             if(response.liked){
-                var unlike = $(selector).attr('data-url').replace(split_url[2], 'unlike');
-                console.log(unlike)
+                var unlike = $(selector).attr('data-url').replace(split_url[3], 'unlike');
                 $(selector).attr('data-url', unlike);
-                $(selector).html("<i class='fas fa-thumbs-up'></i>");
+                $(selector).html("<i class='fas fa-lg fa-heart like-red'></i>");
             } else {
-                var like = $(selector).attr('data-url').replace(split_url[2], 'like');
+                var like = $(selector).attr('data-url').replace(split_url[3], 'like');
                 $(selector).attr('data-url', like);
-                $(selector).html("<i class='far fa-thumbs-up'></i>");
+                $(selector).html("<i class='far fa-lg fa-heart'></i>");
             }
             selector2 = document.getElementsByName("count_" + response.post_id);
             $(selector2).text(response.count);

@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import Http404, JsonResponse
+from django.shortcuts import get_object_or_404
 
 
 from .models import Post, Like
@@ -78,8 +79,9 @@ def like_view(request, pk):
     if not like:
         Like.objects.create(post=post, user=request.user)
     context = {
+        'post_id': post.id,
         'liked': True,
-        'count': post.like__set.count()
+        'count': post.like_set.count()
     }
     if request.is_ajax():
         return JsonResponse(context)
@@ -96,8 +98,9 @@ def unlike_view(request, pk):
     if like:
         like.delete()
     context = {
+        'post_id': post.id,
         'liked': False,
-        'count': post.like__set.count()
+        'count': post.like_set.count()
     }
     if request.is_ajax():
         return JsonResponse(context)
