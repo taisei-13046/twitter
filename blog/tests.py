@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from .models import Post
 
 import time
-# Create your tests here.
+import json
 
 
 class CreateTweetTest(TestCase):
@@ -135,3 +135,68 @@ class DeleteTweetTest(TestCase):
         self.client.login(username='incorrect', password='example13046')
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, 403)
+
+
+class LikeTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('ytaisei', 'example@gmail.com', 'example13046')
+        self.client.login(username='ytaisei', password='example13046')
+        self.post = Post.objects.create(content='user1', author=self.user)
+        self.url = reverse('blog:like', kwargs={'pk': self.post.pk})
+
+    def test_success_like(self):
+        response = self.client.post(self.url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.content)['count'], 1)
+        self.assertEqual(json.loads(response.content)['liked'], True)
+
+    def test_fail_with_like_non_exit_post(self):
+        '''
+        存在しないpostにlikeしたら404errorが返却される
+        '''
+        response = self.client.post(reverse('blog:like', kwargs={'pk': 100}), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response.status_code, 404)
+
+    def test_with_twice_like(self):
+        self.client.post(self.url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        time.sleep(0.1)
+        response = self.client.post(self.url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(json.loads(response.content)['count'], 1)
+        self.assertEqual(json.loads(response.content)['liked'], True)
+
+
+class UnlikeTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('ytaisei', 'example@gmail.com', 'example13046')
+        self.client.login(username='ytaisei', password='example13046')
+        self.post = Post.objects.create(content='user1', author=self.user)
+        self.like_url = reverse('blog:like', kwargs={'pk': self.post.pk})
+        self.unlike_url = reverse('blog:unlike', kwargs={'pk': self.post.pk})
+        self.like_response = self.client.post(self.like_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
+    def test_with_success_unfollow(self):
+        self.assertEqual(self.like_response.status_code, 200)
+        self.assertEqual(json.loads(self.like_response.content)['count'], 1)
+        self.assertEqual(json.loads(self.like_response.content)['liked'], True)
+        unlike_response = self.client.post(self.unlike_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(self.like_response.status_code, 200)
+        self.assertEqual(json.loads(unlike_response.content)['count'], 0)
+        self.assertEqual(json.loads(unlike_response.content)['liked'], False)
+
+    def test_with_twice_unlike(self):
+        self.assertEqual(self.like_response.status_code, 200)
+        self.assertEqual(json.loads(self.like_response.content)['count'], 1)
+        self.assertEqual(json.loads(self.like_response.content)['liked'], True)
+        self.client.post(self.unlike_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        time.sleep(0.1)
+        unlike_response = self.client.post(self.unlike_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(self.like_response.status_code, 200)
+        self.assertEqual(json.loads(unlike_response.content)['count'], 0)
+        self.assertEqual(json.loads(unlike_response.content)['liked'], False)
+
+    def test_fail_with_unlike_non_exit_post(self):
+        '''
+        存在しないpostにunlikeしたら404errorが返却される
+        '''
+        response = self.client.post(reverse('blog:unlike', kwargs={'pk': 100}), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response.status_code, 404)
