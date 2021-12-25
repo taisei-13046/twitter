@@ -1,7 +1,7 @@
 from django.views.generic import CreateView, ListView, TemplateView
 from django.contrib.auth import login
 from django.urls import reverse, reverse_lazy
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, Http404
@@ -74,7 +74,7 @@ def follow_view(request, *args, **kwargs):
 	if not follow_relation.exists():
 		new_follow = Follow(follower=follower, following=following)
 		new_follow.save()
-	return HttpResponseRedirect(reverse('blog:home'))
+	return redirect('blog:home')
 
 
 @login_required
@@ -87,4 +87,4 @@ def unfollow_view(request, *args, **kwargs):
 	follow_relation = Follow.objects.filter(follower=follower, following=following)
 	if follow_relation.exists():
 		follow_relation.delete()
-	return HttpResponseRedirect(reverse('blog:home'))
+	return redirect('blog:home')
