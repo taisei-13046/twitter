@@ -31,7 +31,7 @@ class FollowingListView(LoginRequiredMixin, ListView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		user = get_object_or_404(User, username=self.kwargs['username'])
-		context['following_list'] = user.following.all()
+		context['following_list'] = user.following.all().select_related('follower')
 		return context
 
 
@@ -42,7 +42,7 @@ class FollowerListView(LoginRequiredMixin, ListView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		user = get_object_or_404(User, username=self.kwargs['username'])
-		context['follower_list'] = user.follower.all()
+		context['follower_list'] = user.follower.all().select_related('following')
 		return context
 
 
