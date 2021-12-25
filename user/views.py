@@ -53,7 +53,7 @@ class FollowIndexView(LoginRequiredMixin, TemplateView):
 		context = super().get_context_data(**kwargs)
 		login_user = self.request.user
 		target_user = get_object_or_404(User, username=self.kwargs['username'])
-		has_followed = Follow.objects.filter(follow_to=target_user, follow_from=login_user).count() != 0
+		has_followed = Follow.objects.filter(follower=target_user, following=login_user).count() != 0
 		is_same_user = login_user == target_user
 		context['target_user'] = target_user
 		context['has_followed'] = has_followed
@@ -63,28 +63,28 @@ class FollowIndexView(LoginRequiredMixin, TemplateView):
 
 @login_required
 def follow_view(request, *args, **kwargs):
-	follower = request.user
+	following = request.user
 	try:
-		following = User.objects.get(username=kwargs['username'])
+		follower = User.objects.get(username=kwargs['username'])
 	except User.DoesNotExist:
 		raise Http404('this user does not exist.')
 	if follower == following:
 		raise PermissionDenied()
-	follow_relation = Follow.objects.filter(follow_to=following, follow_from=follower)
+	follow_relation = Follow.objects.filter(follower=follower, following=following)
 	if not follow_relation.count():
-		new_follow = Follow(follow_to=following, follow_from=follower)
+		new_follow = Follow(follower=follower, following=following)
 		new_follow.save()
 	return HttpResponseRedirect(reverse('blog:home'))
 
 
 @login_required
 def unfollow_view(request, *args, **kwargs):
-	follower = request.user
+	following = request.user
 	try:
-		following = User.objects.get(username=kwargs['username'])
+		follower = User.objects.get(username=kwargs['username'])
 	except User.DoesNotExist:
 		raise Http404('this user does not exist.')
-	follow_relation = Follow.objects.filter(follow_to=following, follow_from=follower)
+	follow_relation = Follow.objects.filter(follower=follower, following=following)
 	if follow_relation.count():
 		follow_relation.delete()
 	return HttpResponseRedirect(reverse('blog:home'))
