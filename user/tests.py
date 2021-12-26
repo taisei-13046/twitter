@@ -251,7 +251,7 @@ class FollowTest(TestCase):
         self.client.login(username='user1', password='example13046')
         response = self.client.post(self.create_url2)
         self.assertEqual(response.status_code, 302)
-        following_list = self.user1.following.values_list('follow_to')
+        following_list = self.user1.following.values_list('follower')
         following = User.objects.filter(id__in=following_list)
         for following_name in following:
             self.assertEqual(following_name.username, self.user2.username)
@@ -260,7 +260,7 @@ class FollowTest(TestCase):
         self.client.login(username='user1', password='example13046')
         follow_response = self.client.post(self.create_url1)
         self.assertEqual(follow_response.status_code, 403)
-        following_list = self.user1.following.values_list('follow_to')
+        following_list = self.user1.following.values_list('follower')
         following_count = User.objects.filter(id__in=following_list).count()
         self.assertEqual(following_count, 0)
 
@@ -268,7 +268,7 @@ class FollowTest(TestCase):
         self.client.login(username='user1', password='example13046')
         follow_response = self.client.post(reverse('user:follow', kwargs={'username': 'not_exist'}))
         self.assertEqual(follow_response.status_code, 404)
-        following_list = self.user1.following.values_list('follow_to')
+        following_list = self.user1.following.values_list('follower')
         following_count = User.objects.filter(id__in=following_list).count()
         self.assertEqual(following_count, 0)
 
@@ -287,7 +287,7 @@ class UnFollowTest(TestCase):
         self.client.login(username='user1', password='example13046')
         follow_response = self.client.post(self.create_url2)
         self.assertEqual(follow_response.status_code, 302)
-        following_list = self.user1.following.values_list('follow_to')
+        following_list = self.user1.following.values_list('follower')
         following = User.objects.filter(id__in=following_list)
         for following_name in following:
             self.assertEqual(following_name.username, self.user2.username)
@@ -301,6 +301,6 @@ class UnFollowTest(TestCase):
         self.client.login(username='user1', password='example13046')
         follow_response = self.client.post(self.delete_url2)
         self.assertEqual(follow_response.status_code, 302)
-        following_list = self.user1.following.values_list('follow_to')
+        following_list = self.user1.following.values_list('follower')
         following_count = User.objects.filter(id__in=following_list).count()
         self.assertEqual(following_count, 0)
