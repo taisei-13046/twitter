@@ -1,7 +1,7 @@
-from django.views.generic import CreateView, ListView
+from django.views.generic import CreateView, ListView, TemplateView
 from django.contrib.auth import login
 from django.urls import reverse, reverse_lazy
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, Http404
@@ -31,7 +31,7 @@ class FollowingListView(LoginRequiredMixin, ListView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		user = get_object_or_404(User, username=self.kwargs['username'])
-		context['following_list'] = user.following.all()
+		context['following_list'] = user.following.all().select_related('follower')
 		return context
 
 
@@ -42,50 +42,49 @@ class FollowerListView(LoginRequiredMixin, ListView):
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		user = get_object_or_404(User, username=self.kwargs['username'])
-		context['follower_list'] = user.follower.all()
+		context['follower_list'] = user.follower.all().select_related('following')
 		return context
 
 
-class FollowIndexView(LoginRequiredMixin, ListView):
-	model = Follow
+class FollowIndexView(LoginRequiredMixin, TemplateView):
 	template_name = 'follow/follow_index.html'
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		login_user = self.request.user
 		target_user = get_object_or_404(User, username=self.kwargs['username'])
-		can_follow = Follow.objects.filter(follow_to=target_user, follow_from=login_user).count() == 0
-		same_user = login_user == target_user
+		has_followed = Follow.objects.filter(follower=target_user, following=login_user).exists()
+		is_same_user = login_user == target_user
 		context['target_user'] = target_user
-		context['can_follow'] = can_follow
-		context['same_user'] = same_user
+		context['has_followed'] = has_followed
+		context['is_same_user'] = is_same_user
 		return context
 
 
 @login_required
 def follow_view(request, *args, **kwargs):
-	follower = request.user
+	following = request.user
 	try:
-		following = User.objects.get(username=kwargs['username'])
+		follower = User.objects.get(username=kwargs['username'])
 	except User.DoesNotExist:
 		raise Http404('this user does not exist.')
 	if follower == following:
 		raise PermissionDenied()
-	follow_relation = Follow.objects.filter(follow_to=following, follow_from=follower)
-	if not follow_relation.count():
-		new_follow = Follow(follow_to=following, follow_from=follower)
+	follow_relation = Follow.objects.filter(follower=follower, following=following)
+	if not follow_relation.exists():
+		new_follow = Follow(follower=follower, following=following)
 		new_follow.save()
-	return HttpResponseRedirect(reverse('blog:home'))
+	return redirect('blog:home')
 
 
 @login_required
 def unfollow_view(request, *args, **kwargs):
-	follower = request.user
+	following = request.user
 	try:
-		following = User.objects.get(username=kwargs['username'])
+		follower = User.objects.get(username=kwargs['username'])
 	except User.DoesNotExist:
 		raise Http404('this user does not exist.')
-	follow_relation = Follow.objects.filter(follow_to=following, follow_from=follower)
-	if follow_relation.count():
+	follow_relation = Follow.objects.filter(follower=follower, following=following)
+	if follow_relation.exists():
 		follow_relation.delete()
-	return HttpResponseRedirect(reverse('blog:home'))
+	return redirect('blog:home')
