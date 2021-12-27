@@ -4,44 +4,26 @@
 {% block title %}ホーム{% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-sm navbar-dark bg-dark">
-  <div class="container">
-    <a class="navbar-brand" href="{% url 'blog:home' %}">Twitter</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="mainMenu">
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="userMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            {{ user.username }}
-          </a>
-          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userMenu">
-            <a class="dropdown-item" href="#">My account</a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="{% url 'user:logout' %}">Log out</a>
-          </div>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
 <div class="wrapper">
   <div class="profile">
-    <div>Ready Tweet</div>
-    <div class="profile-box">
+    <h4>Ready Tweet</h4>
+    <div class="profile-box" style="text-align: center">
       <div>{{ user.username }}</div>
-        <div style="display: flex;">
-          <div>
-            <div>Follower</div>
-            <div>2</div>
+        <div style="justify-content: center; display: flex">
+          <div style="margin-right: 5px">
+            <div>Following</div>
+            <div>{{ following_count }}</div>
           </div>
-          <div>
+          <div style="margin-left: 5px">
             <div>Follower</div>
-            <div>2</div>
+            <div>{{ follower_count }}</div>
           </div>
         </div>
         <button onclick="location.href='create'" class="btn btn-primary" >Tweet</button>
+    </div>
+    <div style="margin-top: 20px">
+      <a href="{% url 'user:following' user.username %}" style="color: gray;"><h4>following list</h4></a>
+      <a href="{% url 'user:follower' user.username %}" style="color: gray;"><h4>follower list</h4></a>
     </div>
   </div>
   <div>
@@ -50,7 +32,7 @@
       <hr />
         <div style="font-family: 'HanziPen SC'">{{post.content|linebreaksbr}}</div>
       <p>
-        {{post.author}}
+        <a href="{% url 'user:follow_index' post.author %}" style="color: gray">{{post.author}}</a>
         <small class="white-important full-width flex-row-reverse">
           {{ post.created_at | date:"H:i l, d.m.y" }}
         </small>

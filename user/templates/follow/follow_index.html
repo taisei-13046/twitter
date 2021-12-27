@@ -1,0 +1,25 @@
+{% extends "user/base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% block title %}Tweet{% endblock %}
+
+{% block header %}
+  {% include 'blog/blog_header.html' %}
+{% endblock %}
+
+{% block content %}
+<div>
+    {% if is_same_user %}
+        <h3>you cannot follow yourself</h3>
+        <button class="btn btn-primary"><a href="{% url 'blog:home' %}" style="color: white">back to home</a></button>
+    {% else %}
+            {% if has_followed %}
+                <h3>Do you want to unfollow {{target_user}} ??</h3>
+                <button class="btn btn-primary"><a href="{% url 'user:unfollow' target_user %}" style="color: white">UNFOLLOW</a></button>
+            {% else %}
+                <h3>Do you want to follow {{target_user}} ??</h3>
+                <button class="btn btn-primary"><a href="{% url 'user:follow' target_user %}" style="color: white">FOLLOW</a></button>
+            {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

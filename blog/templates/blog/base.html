@@ -15,6 +15,9 @@
     <title>{% block title %}{% endblock %}</title>
   </head>
   <body>
+    {% block header %}
+      {% include 'blog/blog_header.html' %}
+    {% endblock %}
     <div class="container">
         {% block content %}{% endblock %}
     </div>

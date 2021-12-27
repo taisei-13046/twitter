@@ -235,3 +235,72 @@ class RedirectNotLoginUser(TestCase):
     def test_redirect_not_login_user(self):
         response = self.client.get(self.home_url)
         self.assertRedirects(response, '/login/?next=/blog/')
+
+
+class FollowTest(TestCase):
+
+    def setUp(self):
+        self.user1 = User.objects.create_user('user1', 'example@gmail.com', 'example13046')
+        self.user2 = User.objects.create_user('user2', 'example@gmail.com', 'example13046')
+        self.create_url1 = reverse('user:follow', kwargs={'username': self.user1.username})
+        self.create_url2 = reverse('user:follow', kwargs={'username': self.user2.username})
+        self.delete_url1 = reverse('user:unfollow', kwargs={'username': self.user1.username})
+        self.delete_url2 = reverse('user:unfollow', kwargs={'username': self.user2.username})
+
+    def test_success_create_follow(self):
+        self.client.login(username='user1', password='example13046')
+        response = self.client.post(self.create_url2)
+        self.assertEqual(response.status_code, 302)
+        following_list = self.user1.following.values_list('follower')
+        following = User.objects.filter(id__in=following_list)
+        for following_name in following:
+            self.assertEqual(following_name.username, self.user2.username)
+
+    def test_fail_with_same_user(self):
+        self.client.login(username='user1', password='example13046')
+        follow_response = self.client.post(self.create_url1)
+        self.assertEqual(follow_response.status_code, 403)
+        following_list = self.user1.following.values_list('follower')
+        following_count = User.objects.filter(id__in=following_list).count()
+        self.assertEqual(following_count, 0)
+
+    def test_fail_with_non_exist_user(self):
+        self.client.login(username='user1', password='example13046')
+        follow_response = self.client.post(reverse('user:follow', kwargs={'username': 'not_exist'}))
+        self.assertEqual(follow_response.status_code, 404)
+        following_list = self.user1.following.values_list('follower')
+        following_count = User.objects.filter(id__in=following_list).count()
+        self.assertEqual(following_count, 0)
+
+
+class UnFollowTest(TestCase):
+
+    def setUp(self):
+        self.user1 = User.objects.create_user('user1', 'example@gmail.com', 'example13046')
+        self.user2 = User.objects.create_user('user2', 'example@gmail.com', 'example13046')
+        self.create_url1 = reverse('user:follow', kwargs={'username': self.user1.username})
+        self.create_url2 = reverse('user:follow', kwargs={'username': self.user2.username})
+        self.delete_url1 = reverse('user:unfollow', kwargs={'username': self.user1.username})
+        self.delete_url2 = reverse('user:unfollow', kwargs={'username': self.user2.username})
+
+    def test_success_delete_follow(self):
+        self.client.login(username='user1', password='example13046')
+        follow_response = self.client.post(self.create_url2)
+        self.assertEqual(follow_response.status_code, 302)
+        following_list = self.user1.following.values_list('follower')
+        following = User.objects.filter(id__in=following_list)
+        for following_name in following:
+            self.assertEqual(following_name.username, self.user2.username)
+
+        unfollow_response = self.client.post(self.delete_url2)
+        self.assertEqual(unfollow_response.status_code, 302)
+        following_count = User.objects.filter(id__in=following_list).count()
+        self.assertEqual(following_count, 0)
+
+    def test_fail_with_unfollow_to_non_follow_user(self):
+        self.client.login(username='user1', password='example13046')
+        follow_response = self.client.post(self.delete_url2)
+        self.assertEqual(follow_response.status_code, 302)
+        following_list = self.user1.following.values_list('follower')
+        following_count = User.objects.filter(id__in=following_list).count()
+        self.assertEqual(following_count, 0)

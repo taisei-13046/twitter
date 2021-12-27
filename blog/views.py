@@ -1,20 +1,24 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import CreateView, View, DetailView, DeleteView, UpdateView
+from django.views.generic import CreateView, DetailView, DeleteView, UpdateView, ListView
 from .forms import PostCreateForm, PostUpdateForm
 from django.urls import reverse_lazy
-from django.shortcuts import render
+from django.contrib.auth.models import User
 
 from .models import Post
+from user.models import Follow
 
 
-class HomeView(LoginRequiredMixin, View):
+class HomeView(LoginRequiredMixin, ListView):
+    model = User
+    template_name = "blog/home.html"
 
-    def get(self, request):
-        post_list = Post.objects.all()
-        context = {
-            'post_list': post_list,
-        }
-        return render(request, 'blog/home.html', context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        login_user = self.request.user
+        context['following_count'] = Follow.objects.filter(following=login_user).count()
+        context['follower_count'] = Follow.objects.filter(follower=login_user).count()
+        context['post_list'] = Post.objects.all()
+        return context
 
 
 class CreateTweetView(LoginRequiredMixin, CreateView):

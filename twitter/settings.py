@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'user',
     'blog',
     'widget_tweaks',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'twitter.urls'
@@ -135,3 +137,13 @@ LOGOUT_REDIRECT_URL = 'user:signup'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# test時にprintを出力
+NOSE_ARGS = [
+    '--nocapture',
+    '--nologcapture',
+]
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+]

@@ -9,4 +9,9 @@ urlpatterns = [
     path('', views.SignUpView.as_view(), name="signup"),
     path('login/', auth_views.LoginView.as_view(template_name='user/login.html'), name="login"),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('<str:username>/follow/index/', views.FollowIndexView.as_view(), name="follow_index"),
+    path('<str:username>/following/', views.FollowingListView.as_view(), name="following"),
+    path('<str:username>/follower/', views.FollowerListView.as_view(), name="follower"),
+    path('<str:username>/follow/', views.follow_view, name="follow"),
+    path('<str:username>/unfollow/', views.unfollow_view, name="unfollow"),
 ]
