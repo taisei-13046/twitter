@@ -32,26 +32,28 @@ $("[data-action='like']").on('click', function(event){
     let url = $(this).attr('data-url')
     let split_url = $(this).attr('data-url').split('/');
     let post_id = $(this).attr('data-store-id')
-    $.ajax({
-        type: 'POST',
-        url: url,
-        data: {
-            'post_id': post_id,
+    fetch(url, {
+        method: "POST",
+        body: {
+            'post_id': post_id
         },
-        dataType: 'json',
-        success: function(response){
-            selector = document.getElementsByName(response.post_id);
-            if(response.liked){
-                var unlike = $(selector).attr('data-url').replace(split_url[3], 'unlike');
-                $(selector).attr('data-url', unlike);
-                $(selector).html("<i class='fas fa-lg fa-heart like-red'></i>");
-            } else {
-                var like = $(selector).attr('data-url').replace(split_url[3], 'like');
-                $(selector).attr('data-url', like);
-                $(selector).html("<i class='far fa-lg fa-heart'></i>");
-            }
-            selector2 = document.getElementsByName("count_" + response.post_id);
-            $(selector2).text(response.count);
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken,
+        },
+    }).then(response => {
+        console.log(response.json())
+        selector = document.getElementsByName(response.post_id);
+        if(response.liked){
+            var unlike = $(selector).attr('data-url').replace(split_url[3], 'unlike');
+            $(selector).attr('data-url', unlike);
+            $(selector).html("<i class='fas fa-lg fa-heart like-red'></i>");
+        } else {
+            var like = $(selector).attr('data-url').replace(split_url[3], 'like');
+            $(selector).attr('data-url', like);
+            $(selector).html("<i class='far fa-lg fa-heart'></i>");
         }
-    });
+        selector2 = document.getElementsByName("count_" + response.post_id);
+        $(selector2).text(response.count);
+    })
 });
