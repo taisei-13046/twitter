@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import Post
+from .models import Post, Like
 
 import time
 import json
@@ -141,14 +141,17 @@ class LikeTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user('ytaisei', 'example@gmail.com', 'example13046')
         self.client.login(username='ytaisei', password='example13046')
-        self.post = Post.objects.create(content='user1', author=self.user)
+        self.post = Post.objects.create(content='user1_content', author=self.user)
         self.url = reverse('blog:like', kwargs={'pk': self.post.pk})
 
     def test_success_like(self):
         response = self.client.post(self.url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        like = Like.objects.get(id=1)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.content)['count'], 1)
         self.assertEqual(json.loads(response.content)['liked'], True)
+        self.assertEqual(like.user, self.user)
+        self.assertEqual(like.post.pk, self.post.pk)
 
     def test_fail_with_like_non_exit_post(self):
         '''
@@ -161,8 +164,13 @@ class LikeTest(TestCase):
         self.client.post(self.url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         time.sleep(0.1)
         response = self.client.post(self.url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        like = Like.objects.get(id=1)
+        like_count = Like.objects.all().count()
         self.assertEqual(json.loads(response.content)['count'], 1)
         self.assertEqual(json.loads(response.content)['liked'], True)
+        self.assertEqual(like.user, self.user)
+        self.assertEqual(like.post.pk, self.post.pk)
+        self.assertEqual(like_count, 1)
 
 
 class UnlikeTest(TestCase):
@@ -172,27 +180,23 @@ class UnlikeTest(TestCase):
         self.post = Post.objects.create(content='user1', author=self.user)
         self.like_url = reverse('blog:like', kwargs={'pk': self.post.pk})
         self.unlike_url = reverse('blog:unlike', kwargs={'pk': self.post.pk})
-        self.like_response = self.client.post(self.like_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        Like.objects.create(user=self.user, post=self.post)
 
-    def test_with_success_unfollow(self):
-        self.assertEqual(self.like_response.status_code, 200)
-        self.assertEqual(json.loads(self.like_response.content)['count'], 1)
-        self.assertEqual(json.loads(self.like_response.content)['liked'], True)
+    def test_success_unfollow(self):
         unlike_response = self.client.post(self.unlike_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-        self.assertEqual(self.like_response.status_code, 200)
+        like_count = Like.objects.all().count()
         self.assertEqual(json.loads(unlike_response.content)['count'], 0)
         self.assertEqual(json.loads(unlike_response.content)['liked'], False)
+        self.assertEqual(like_count, 0)
 
     def test_with_twice_unlike(self):
-        self.assertEqual(self.like_response.status_code, 200)
-        self.assertEqual(json.loads(self.like_response.content)['count'], 1)
-        self.assertEqual(json.loads(self.like_response.content)['liked'], True)
         self.client.post(self.unlike_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         time.sleep(0.1)
         unlike_response = self.client.post(self.unlike_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-        self.assertEqual(self.like_response.status_code, 200)
+        like_count = Like.objects.all().count()
         self.assertEqual(json.loads(unlike_response.content)['count'], 0)
         self.assertEqual(json.loads(unlike_response.content)['liked'], False)
+        self.assertEqual(like_count, 0)
 
     def test_fail_with_unlike_non_exit_post(self):
         '''
