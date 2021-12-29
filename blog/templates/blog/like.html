@@ -1,10 +1,10 @@
 {% if post.id in liked_list %}
-    <a id="like" href="javascript:void(0);" name="{{post.id}}" data-url="{% url 'blog:unlike' post.pk %}" type="button">
+    <a data-action="like" href="javascript:void(0);" name="{{post.id}}" data-store-id="{{post.id}}" data-url="{% url 'blog:unlike' post.pk %}" type="button">
         <i class="fas fa-lg fa-heart like-red"></i>
     </a>
 {% else %}
-    <a id="like" href="javascript:void(0);" name="{{post.id}}" data-url="{% url 'blog:like' post.pk %}" type="button">
+    <a data-action="like" href="javascript:void(0);" name="{{post.id}}" data-store-id="{{post.id}}" data-url="{% url 'blog:like' post.pk %}" type="button">
         <i class="far fa-lg fa-heart"></i>
     </a>
 {% endif %}
-<span name="count_{{post.id}}" class="count">{{ post.like_set.count }}</span>
+<span name="count_{{post.id}}" class="count">{{ post.like_post.count }}</span>

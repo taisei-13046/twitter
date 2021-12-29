@@ -21,7 +21,7 @@ class HomeView(LoginRequiredMixin, ListView):
         login_user = self.request.user
         context['following_count'] = Follow.objects.filter(following=login_user).count()
         context['follower_count'] = Follow.objects.filter(follower=login_user).count()
-        context['post_list'] = Post.objects.all()
+        context['post_list'] = Post.objects.prefetch_related('like_post').all()
         context['liked_list'] = Like.objects.filter(user=login_user).values_list('post', flat=True)
         return context
 
@@ -80,7 +80,7 @@ def like_view(request, pk):
     context = {
         'post_id': post.id,
         'liked': True,
-        'count': post.like_set.count()
+        'count': post.like_post.count()
     }
     return JsonResponse(context)
 
@@ -98,6 +98,6 @@ def unlike_view(request, pk):
     context = {
         'post_id': post.id,
         'liked': False,
-        'count': post.like_set.count()
+        'count': post.like_post.count()
     }
     return JsonResponse(context)

@@ -27,11 +27,11 @@ $.ajaxSetup({
     }
 });
 
-$(document).on('click', '#like', function(event){
+$("[data-action='like']").on('click', function(event){
     event.preventDefault();
-    var url = $(this).attr('data-url')
-    var post_id = $(this).attr('name')
-    var split_url = $(this).attr('data-url').split('/');
+    let url = $(this).attr('data-url')
+    let split_url = $(this).attr('data-url').split('/');
+    let post_id = $(this).attr('data-store-id')
     $.ajax({
         type: 'POST',
         url: url,
