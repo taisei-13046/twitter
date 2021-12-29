@@ -78,7 +78,6 @@ def like_view(request, pk):
     if not like:
         Like.objects.create(post=post, user=request.user)
     context = {
-        'post_id': post.id,
         'liked': True,
         'count': post.like_post.count()
     }
@@ -96,7 +95,6 @@ def unlike_view(request, pk):
     if like:
         like.delete()
     context = {
-        'post_id': post.id,
         'liked': False,
         'count': post.like_post.count()
     }

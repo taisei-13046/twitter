@@ -29,9 +29,10 @@ $.ajaxSetup({
 
 $("[data-action='like']").on('click', function(event){
     event.preventDefault();
-    let url = $(this).attr('data-url')
-    let split_url = $(this).attr('data-url').split('/');
-    let post_id = $(this).attr('data-store-id')
+    const url = $(this).attr('data-url')
+    const split_url = $(this).attr('data-url').split('/');
+    const post_id = $(this).attr('data-store-id')
+    const el = $(this)
     async function PostData(){
         await fetch(url, {
             method: "POST",
@@ -45,18 +46,16 @@ $("[data-action='like']").on('click', function(event){
         }).then(response => {
             return response.json()
         }).then(response => {
-            console.log(response)
-            selector = document.getElementsByName(post_id);
             if(response.liked){
-                const unlike = $(selector).attr('data-url').replace(split_url[3], 'unlike');
-                $(selector).attr('data-url', unlike);
-                $(selector).html("<i class='fas fa-lg fa-heart like-red'></i>");
+                const unlike = el.attr('data-url').replace(split_url[3], 'unlike');
+                el.attr('data-url', unlike);
+                el.html("<i class='fas fa-lg fa-heart like-red'></i>");
             } else {
-                const like = $(selector).attr('data-url').replace(split_url[3], 'like');
-                $(selector).attr('data-url', like);
-                $(selector).html("<i class='far fa-lg fa-heart'></i>");
+                const like = el.attr('data-url').replace(split_url[3], 'like');
+                el.attr('data-url', like);
+                el.html("<i class='far fa-lg fa-heart'></i>");
             }
-            selector2 = document.getElementsByName("count_" + response.post_id);
+            selector2 = document.getElementsByName("count_" + post_id);
             $(selector2).text(response.count);
         })
     }
