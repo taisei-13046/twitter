@@ -182,7 +182,7 @@ class UnlikeTest(TestCase):
         self.unlike_url = reverse('blog:unlike', kwargs={'pk': self.post.pk})
         Like.objects.create(user=self.user, post=self.post)
 
-    def test_success_unfollow(self):
+    def test_success_unlike(self):
         unlike_response = self.client.post(self.unlike_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         like_count = Like.objects.all().count()
         self.assertEqual(json.loads(unlike_response.content)['count'], 0)
