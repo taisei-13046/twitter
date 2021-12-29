@@ -55,8 +55,8 @@ $("[data-action='like']").on('click', function(event){
                 el.attr('data-url', like);
                 el.html("<i class='far fa-lg fa-heart'></i>");
             }
-            selector2 = document.getElementsByName("count_" + post_id);
-            $(selector2).text(response.count);
+            count_selector = document.getElementsByName("count_" + post_id);
+            $(count_selector).text(response.count);
         })
     }
     PostData()
