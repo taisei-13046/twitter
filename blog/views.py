@@ -82,8 +82,7 @@ def like_view(request, pk):
         'liked': True,
         'count': post.like_set.count()
     }
-    if request.is_ajax():
-        return JsonResponse(context)
+    return JsonResponse(context)
 
 
 @login_required
@@ -101,5 +100,4 @@ def unlike_view(request, pk):
         'liked': False,
         'count': post.like_set.count()
     }
-    if request.is_ajax():
-        return JsonResponse(context)
+    return JsonResponse(context)
