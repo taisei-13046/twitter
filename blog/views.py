@@ -21,7 +21,7 @@ class HomeView(LoginRequiredMixin, ListView):
         login_user = self.request.user
         context['following_count'] = Follow.objects.filter(following=login_user).count()
         context['follower_count'] = Follow.objects.filter(follower=login_user).count()
-        context['post_list'] = Post.objects.prefetch_related('like_post').all()
+        context['post_list'] = Post.objects.prefetch_related('like_post').select_related('author').all()
         context['liked_list'] = Like.objects.filter(user=login_user).values_list('post', flat=True)
         return context
 
