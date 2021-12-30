@@ -49,11 +49,14 @@ $("[data-action='like']").on('click', function(event){
             if(response.liked){
                 const unlike = el.attr('data-url').replace(split_url[3], 'unlike');
                 el.attr('data-url', unlike);
-                el.html("<i class='fas fa-lg fa-heart like-red'></i>");
+                const unlike_css = "fas fa-lg fa-heart like-red"
+                el.children('i').attr('class', unlike_css)
+
             } else {
                 const like = el.attr('data-url').replace(split_url[3], 'like');
                 el.attr('data-url', like);
-                el.html("<i class='far fa-lg fa-heart'></i>");
+                const like_css = "far fa-lg fa-heart"
+                el.children('i').attr('class', like_css)
             }
             count_selector = document.getElementsByName("count_" + post_id);
             $(count_selector).text(response.count);
