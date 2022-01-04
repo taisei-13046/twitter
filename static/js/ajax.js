@@ -62,5 +62,5 @@ $("[data-action='like']").on('click', function(event){
             $(count_selector).text(response.count);
         })
     }
-    PostData()
+    postData()
 });
