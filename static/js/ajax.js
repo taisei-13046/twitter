@@ -35,7 +35,7 @@ $("[data-action='like']").on('click', function(event){
     const el = $(this)
     const like_css = "far fa-lg fa-heart"
     const unlike_css = "fas fa-lg fa-heart like-red"
-    async function PostData(){
+    async function postData(){
         await fetch(url, {
             method: "POST",
             body: {
