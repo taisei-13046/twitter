@@ -41,6 +41,7 @@
           <a href="{% url 'blog:update' post.id %}">Update</a>
           <a href="{% url 'blog:delete' post.id %}">Delete</a>
         {% endif %}
+        {% include 'blog/like.html' %}
       <p/>
     </div>
     {% endfor %}
